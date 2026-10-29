@@ -22,7 +22,7 @@ Repo ini merupakan port yang merekonsiliasi [EdgeTypE/dsh-better-deepseek](https
 
 Pastikan Anda sudah memiliki:
 
-- **Node.js 20 atau lebih baru**.
+- **Node.js `^22.19.0 || >=24.0.0`**.
 - DSH CLI yang dapat dijalankan dari terminal.
 - DSH Web profile yang sudah diinisialisasi.
 - Ekstensi [Better DeepSeek](https://github.com/EdgeTypE/better-deepseek) jika ingin menggunakan integrasi browser.
@@ -78,7 +78,7 @@ git clone https://github.com/mulqizamzam/dsh-better-deepseek.git
 cd dsh-better-deepseek
 ```
 
-Paket ini menggunakan dependensi internal/workspace DSH, seperti Cordis, DSH Agent, DSH Web Server, dan Schemastery. Jadi, menjalankan `npm install` langsung di repo ini belum cukup untuk menjalankan plugin sebagai aplikasi mandiri. Pengujian runtime perlu dilakukan di checkout/workspace DSH yang menyediakan versi dependensi yang kompatibel.
+Target kompatibilitas paket ini dinyatakan secara eksplisit sebagai DSH `0.2.1-rc.2` melalui `engines.dsh`. Paket ini menggunakan dependensi internal/workspace DSH, seperti Cordis, DSH Agent, DSH Web Server, dan Schemastery. Jadi, menjalankan `npm install` langsung di repo ini belum cukup untuk menjalankan plugin sebagai aplikasi mandiri. Pengujian runtime perlu dilakukan di checkout/workspace DSH yang menyediakan versi dependensi yang kompatibel.
 
 Jangan memasang source ke instalasi yang sedang dipakai tanpa backup dan tanpa memeriksa konfigurasi profile terlebih dahulu.
 
