@@ -57,7 +57,19 @@ npx @deepseek-ai/dsh web
 
 **Catatan penting:** perintah registry di atas belum bisa digunakan sebelum paket versi tersebut diterbitkan. Repo GitHub ini sendiri bukan publikasi npm.
 
-### 3. Ambil source untuk pengembangan
+### 3. Instal menggunakan PowerShell (Windows)
+
+Repository menyediakan `scripts/install.ps1`. Unduh file tersebut sebagai berkas terlebih dahulu, periksa isi skripnya, lalu jalankan dari PowerShell setelah DSH Web profile pernah diinisialisasi:
+
+```powershell
+# Jalankan dari folder tempat install.ps1 disimpan
+.\install.ps1 -Version 0.2.1-rc.2 -DryRun
+.\install.ps1 -Version 0.2.1-rc.2
+```
+
+Perintah pertama hanya menampilkan rencana perubahan. Perintah kedua mengubah konfigurasi workspace profile DSH dan menjalankan instalasi paket. Jalankan hanya setelah Anda meninjau skrip dan setelah versi paket benar-benar tersedia di registry. Jangan gunakan `irm ... | iex` tanpa inspeksi skrip terlebih dahulu.
+
+### 4. Ambil source untuk pengembangan
 
 Untuk melihat atau mengembangkan source code:
 
@@ -70,7 +82,7 @@ Paket ini menggunakan dependensi internal/workspace DSH, seperti Cordis, DSH Age
 
 Jangan memasang source ke instalasi yang sedang dipakai tanpa backup dan tanpa memeriksa konfigurasi profile terlebih dahulu.
 
-## 4. Pastikan bridge aktif
+## 5. Pastikan bridge aktif
 
 Setelah plugin berhasil dimuat dan DSH Web server berjalan, buka URL berikut di browser:
 
