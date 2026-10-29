@@ -114,6 +114,10 @@ Confirm the extension is enabled, CORS is configured as expected, and the browse
 
 A prompt or cancellation request requires the session ID returned by `session.create`. Recreate the session and use the ID from that response.
 
+## Version
+
+Current repository target: `0.2.1-rc.2` (release candidate). The bridge handshake reports this same target version.
+
 ## Development and validation
 
 The upstream package includes TypeScript source, compiled JavaScript, DSH Cordis patch metadata, an installer script, and tests for the ping route, CORS preflight, and SSE endpoint. Before a release, validate package metadata, keep source and compiled output aligned, and run tests against the compatible DSH workspace/runtime. Workspace-based dependencies mean the package should be verified against the targeted DSH version rather than treated as an independent application.
