@@ -1,135 +1,155 @@
 # DSH Better DeepSeek Bridge
 
-**DeepSeek Harness (DSH) plugin for connecting the [Better DeepSeek browser extension](https://github.com/EdgeTypE/better-deepseek) to DSH sessions.**
+**Plugin DeepSeek Harness (DSH) untuk menghubungkan ekstensi browser [Better DeepSeek](https://github.com/EdgeTypE/better-deepseek) dengan sesi agent DSH.**
 
-This repository is a reconciled port of [EdgeTypE/dsh-better-deepseek](https://github.com/EdgeTypE/dsh-better-deepseek), prepared for the DSH-native harness release target **0.2.1-rc.2**. It provides a local HTTP bridge and Server-Sent Events (SSE) stream so the browser extension can create a DSH agent session, submit prompts, receive progress, fetch the latest assistant response, and cancel a task.
+Repo ini merupakan port yang merekonsiliasi [EdgeTypE/dsh-better-deepseek](https://github.com/EdgeTypE/dsh-better-deepseek) untuk target versi **`0.2.1-rc.2`**. Bridge lokal ini menyediakan endpoint HTTP dan aliran event SSE agar ekstensi browser dapat membuat sesi agent, mengirim prompt, menerima progres, mengambil jawaban terbaru, serta membatalkan tugas.
 
-> **Release status:** 0.2.1-rc.2 is the requested target version. This repository does not claim a published npm release unless one is explicitly linked in the Releases section.
+> **Status versi:** `0.2.1-rc.2` adalah target rilis kandidat yang diminta. Commit di GitHub tidak otomatis berarti paket dengan versi ini sudah diterbitkan ke npm. Instalasi melalui registry hanya akan berhasil setelah versi tersebut benar-benar dipublikasikan.
 
-## What it does
+## Fitur utama
 
-- Connects Better DeepSeek to DSH's Web profile.
-- Creates a DSH agent session using the requested working directory.
-- Sends a prompt to an existing session.
-- Streams assistant and tool events over SSE.
-- Returns the latest assistant text and session status.
-- Cancels an active agent task.
-- Supports CORS for browser-extension requests; configure it deliberately for your environment.
+- Menghubungkan ekstensi Better DeepSeek ke DSH Web profile.
+- Membuat sesi agent DSH dengan direktori kerja tertentu.
+- Mengirim prompt ke sesi yang sudah dibuat.
+- Mengirim event jawaban assistant dan aktivitas tool melalui Server-Sent Events (SSE).
+- Mengambil status sesi dan teks assistant terbaru.
+- Meminta pembatalan tugas yang sedang berjalan.
+- Mendukung preflight CORS untuk permintaan dari ekstensi browser.
 
-## Beginner's guide: install in DSH
+## Panduan pemula: memasang di DSH
 
-### Requirements
+### 1. Siapkan kebutuhan
 
-- Node.js 20 or newer.
-- DSH CLI installed and working.
-- The DSH Web profile initialized at least once.
-- The [Better DeepSeek browser extension](https://github.com/EdgeTypE/better-deepseek) if you want to use the browser integration.
+Pastikan Anda sudah memiliki:
 
-### Option A — install from the DSH plugin registry
+- **Node.js 20 atau lebih baru**.
+- DSH CLI yang dapat dijalankan dari terminal.
+- DSH Web profile yang sudah diinisialisasi.
+- Ekstensi [Better DeepSeek](https://github.com/EdgeTypE/better-deepseek) jika ingin menggunakan integrasi browser.
 
-When version **0.2.1-rc.2** is published to the package registry, run:
-
-```bash
-dsh plugin --profile web add dsh-better-deepseek@0.2.1-rc.2
-```
-
-If you do not have `dsh` installed globally, run:
-
-```bash
-npx @deepseek-ai/dsh plugin --profile web add dsh-better-deepseek@0.2.1-rc.2
-```
-
-Then restart the DSH Web profile:
+Untuk memulai DSH Web profile, jalankan:
 
 ```bash
 npx @deepseek-ai/dsh web
 ```
 
-**Important:** Registry installation works only after that exact package version has been published. This repository commit by itself does not publish to npm.
+Biarkan server berjalan, lalu buka terminal lain untuk perintah berikutnya.
 
-### Option B — install from source (for testing/development)
+### 2. Instal dari registry DSH/npm
 
-1. Clone the repository:
+Setelah versi `0.2.1-rc.2` tersedia di registry, jalankan:
 
-   ```bash
-   git clone https://github.com/mulqizamzam/dsh-better-deepseek.git
-   cd dsh-better-deepseek
-   ```
+```bash
+dsh plugin --profile web add dsh-better-deepseek@0.2.1-rc.2
+```
 
-2. Inspect the package and source before installing. The package is a DSH extension and depends on DSH runtime packages; it is not a standalone Node application.
-3. To test the extension inside a DSH source checkout, place/link the package in the matching extension workspace and use that checkout's documented build/test workflow. Do not assume that running `npm install` at this repository root is sufficient: the original package uses DSH workspace dependencies.
+Jika perintah `dsh` tidak terpasang secara global, gunakan:
 
-For Windows users who prefer PowerShell, the source project's installer script can be reviewed and run locally after verifying its contents. Do not pipe a remote script directly into `iex` unless you have inspected and trust the script.
+```bash
+npx @deepseek-ai/dsh plugin --profile web add dsh-better-deepseek@0.2.1-rc.2
+```
 
-## Confirm the bridge is running
+Setelah instalasi, restart proses DSH Web agar plugin dimuat. Cara restart bergantung pada cara Anda menjalankan DSH; bila memakai terminal biasa, hentikan proses dengan `Ctrl+C`, kemudian jalankan kembali:
 
-After the plugin has loaded and the DSH Web server is running, open:
+```bash
+npx @deepseek-ai/dsh web
+```
+
+**Catatan penting:** perintah registry di atas belum bisa digunakan sebelum paket versi tersebut diterbitkan. Repo GitHub ini sendiri bukan publikasi npm.
+
+### 3. Ambil source untuk pengembangan
+
+Untuk melihat atau mengembangkan source code:
+
+```bash
+git clone https://github.com/mulqizamzam/dsh-better-deepseek.git
+cd dsh-better-deepseek
+```
+
+Paket ini menggunakan dependensi internal/workspace DSH, seperti Cordis, DSH Agent, DSH Web Server, dan Schemastery. Jadi, menjalankan `npm install` langsung di repo ini belum cukup untuk menjalankan plugin sebagai aplikasi mandiri. Pengujian runtime perlu dilakukan di checkout/workspace DSH yang menyediakan versi dependensi yang kompatibel.
+
+Jangan memasang source ke instalasi yang sedang dipakai tanpa backup dan tanpa memeriksa konfigurasi profile terlebih dahulu.
+
+## 4. Pastikan bridge aktif
+
+Setelah plugin berhasil dimuat dan DSH Web server berjalan, buka URL berikut di browser:
 
 ```text
 http://127.0.0.1:PORT/api/better-deepseek/ping
 ```
 
-Replace `PORT` with the port configured for your DSH Web profile. A healthy bridge should return JSON with `active: true`, a bridge version, and capability names.
+Ganti `PORT` dengan port yang dikonfigurasi untuk DSH Web profile Anda. Respons yang sehat adalah JSON yang memuat `"active": true`, versi bridge, dan daftar kapabilitas.
 
-## HTTP endpoints
+Jika endpoint tidak dapat dibuka, pastikan DSH Web aktif, plugin terpasang di profile `web`, dan nomor port sudah benar.
 
-The plugin registers these endpoints under `/api/better-deepseek`:
+## Endpoint HTTP
 
-| Endpoint | Method | Purpose |
-|---|---:|---|
-| `/ping` | GET | Health check and capability handshake |
-| `/events` | GET | Server-Sent Events (SSE) stream for assistant/tool events |
-| `/session.create` | POST | Create an agent session with a working directory |
-| `/session.prompt` | POST | Submit a prompt to an existing session |
-| `/session.result` | GET | Fetch session status and latest assistant text |
-| `/session.cancel` | POST | Request cancellation of an agent task |
+Semua endpoint berada di bawah prefix `/api/better-deepseek`.
 
-The POST RPC routes accept JSON payloads in the bridge protocol expected by Better DeepSeek. For details, inspect the extension's integration code and the plugin implementation before building custom clients.
+| Endpoint | Metode | Fungsi |
+|---|---|---|
+| `/ping` | GET | Health check dan handshake kapabilitas |
+| `/events` | GET | Stream event SSE untuk jawaban assistant dan pemanggilan tool |
+| `/session.create` | POST | Membuat sesi agent dengan direktori kerja |
+| `/session.prompt` | POST | Mengirim prompt ke sesi agent |
+| `/session.result` | GET | Mengambil status sesi dan teks assistant terbaru |
+| `/session.cancel` | POST | Meminta pembatalan tugas sesi |
 
-## Configuration
+Endpoint POST menerima JSON sesuai protokol bridge yang digunakan oleh ekstensi Better DeepSeek. Untuk membuat klien kustom, periksa kode integrasi ekstensi dan implementasi plugin terlebih dahulu.
 
-The package's DSH patch configures:
+## Konfigurasi
 
-| Setting | Default | Meaning |
-|---|---:|---|
-| `enableCors` | `true` | Adds CORS headers so a browser extension can call the bridge |
+File `cordis.patch.yml` mengaktifkan layanan dengan konfigurasi berikut:
 
-CORS with `Access-Control-Allow-Origin: *` is convenient for local extension integration, but broad. Do not expose the DSH Web server to an untrusted network. Prefer loopback binding and review your network exposure, extension origin, and proxy configuration before enabling remote access.
+| Opsi | Default | Keterangan |
+|---|---|---|
+| `enableCors` | `true` | Menambahkan header CORS agar permintaan ekstensi browser dapat diterima |
 
-## Troubleshooting
+## Keamanan jaringan
 
-**The plugin command cannot find the package**
+Secara default, bridge mengizinkan origin lintas-domain dengan `Access-Control-Allow-Origin: *` agar kompatibel dengan ekstensi browser. Ini memudahkan integrasi lokal, tetapi **bukan mekanisme autentikasi**.
 
-The version may not have been published to the package registry. Check the release/package links and use source-development setup until the version is available.
+- Jalankan DSH di loopback/localhost kecuali Anda benar-benar membutuhkan akses jaringan lain.
+- Jangan mengekspos DSH Web server ke internet atau jaringan yang tidak tepercaya.
+- Jangan mengatasi masalah koneksi dengan membuka port ke publik.
+- Tinjau konfigurasi CORS, browser extension, proxy, dan firewall sebelum mengaktifkan akses jarak jauh.
 
-**The ping endpoint does not respond**
+Bridge ini tidak menambahkan lapisan autentikasi tersendiri pada endpoint yang didokumentasikan.
 
-Confirm DSH Web is running, the plugin is installed in the `web` profile, and you used the correct local port.
+## Pemecahan masalah
 
-**The browser extension cannot connect**
+**Perintah instalasi tidak menemukan paket atau versi.**  
+Pastikan paket `dsh-better-deepseek@0.2.1-rc.2` telah tersedia di registry. Jika belum diterbitkan, instalasi registry memang belum bisa dilakukan.
 
-Confirm the extension is enabled, CORS is configured as expected, and the browser is calling the same host/port where DSH Web is listening. Avoid exposing the server publicly to work around a local connection problem.
+**Endpoint `/ping` tidak merespons.**  
+Periksa apakah DSH Web sedang berjalan, plugin masuk ke profile `web`, dan URL memakai port yang benar.
 
-**The session is not found**
+**Ekstensi browser tidak bisa tersambung.**  
+Pastikan ekstensi aktif, alamat host/port cocok dengan server DSH, dan header CORS tidak diubah oleh proxy. Jangan membuka server DSH ke jaringan publik hanya untuk melewati masalah konektivitas.
 
-A prompt or cancellation request requires the session ID returned by `session.create`. Recreate the session and use the ID from that response.
+**Prompt atau pembatalan menghasilkan “Session not found”.**  
+Keduanya memerlukan `sessionId` yang dikembalikan oleh endpoint `session.create`. Buat sesi baru dan gunakan ID yang benar dari respons tersebut.
 
-## Version
+## Pengembangan dan validasi
 
-Current repository target: `0.2.1-rc.2` (release candidate). The bridge handshake reports this same target version.
+Source mencakup layanan TypeScript, entry-point runtime JavaScript, konfigurasi Cordis, companion invariant, dan tes untuk handshake, CORS preflight, serta endpoint SSE. Sebelum rilis:
 
-## Development and validation
+1. Pastikan source TypeScript dan entry-point runtime konsisten.
+2. Jalankan tes di lingkungan DSH yang cocok dengan dependensi workspace.
+3. Uji integrasi dengan ekstensi browser pada profile lokal.
+4. Pastikan versi package, versi handshake, dan changelog selaras.
+5. Periksa konfigurasi jaringan dan risiko CORS sebelum deployment.
 
-The upstream package includes TypeScript source, compiled JavaScript, DSH Cordis patch metadata, an installer script, and tests for the ping route, CORS preflight, and SSE endpoint. Before a release, validate package metadata, keep source and compiled output aligned, and run tests against the compatible DSH workspace/runtime. Workspace-based dependencies mean the package should be verified against the targeted DSH version rather than treated as an independent application.
+Tes yang disimpan di repository belum berarti telah dijalankan pada runtime DSH untuk commit ini.
 
-## Project and attribution
+## Proyek terkait dan atribusi
 
-- Reconciled port: [mulqizamzam/dsh-better-deepseek](https://github.com/mulqizamzam/dsh-better-deepseek)
-- Upstream: [EdgeTypE/dsh-better-deepseek](https://github.com/EdgeTypE/dsh-better-deepseek)
-- Browser extension: [EdgeTypE/better-deepseek](https://github.com/EdgeTypE/better-deepseek)
+- **Port:** [mulqizamzam/dsh-better-deepseek](https://github.com/mulqizamzam/dsh-better-deepseek)
+- **Source upstream:** [EdgeTypE/dsh-better-deepseek](https://github.com/EdgeTypE/dsh-better-deepseek)
+- **Ekstensi browser:** [EdgeTypE/better-deepseek](https://github.com/EdgeTypE/better-deepseek)
 
-The port aims to preserve useful engineering behavior and integration workflow from upstream while documenting installation and release assumptions clearly. Verify the upstream license and preserve applicable notices when redistributing source.
+Port ini mempertahankan alur integrasi bridge upstream dengan dokumentasi instalasi dan batasan rilis yang lebih eksplisit. Source upstream menyatakan lisensi MIT; pertahankan pemberitahuan lisensi dan atribusi yang berlaku saat redistribusi.
 
-## License
+## Lisensi
 
-The upstream package declares MIT in its package metadata. Confirm and retain the upstream license file/notices in the reconciled port before redistributing source code.
+Lihat file [LICENSE](./LICENSE).
