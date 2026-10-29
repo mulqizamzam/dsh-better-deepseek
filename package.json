@@ -58,5 +58,13 @@
   },
   "scripts": {
     "test": "vitest run"
+  },
+  "types": "lib/types/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0",
+    "dsh": "0.2.1-rc.2"
   }
 }
