@@ -68,7 +68,18 @@ function Get-DshCli {
 
 # Prerequisites
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
-  Die 'Node.js not found (Node.js >= 20 is required). Please install Node.js.'
+  Die 'Node.js not found. DSH 0.2.1-rc.2 requires Node.js ^22.19.0 or >=24.0.0. Please install a supported Node.js version.'
+}
+$nodeVersionRaw = & node -p "process.versions.node" 2>$null
+try {
+  $nodeVersion = [version]$nodeVersionRaw.Trim()
+}
+catch {
+  Die "Unable to parse the installed Node.js version: $nodeVersionRaw"
+}
+$nodeSupported = (($nodeVersion.Major -eq 22 -and $nodeVersion -ge [version]'22.19.0') -or ($nodeVersion.Major -ge 24))
+if (-not $nodeSupported) {
+  Die "Unsupported Node.js version $nodeVersion. DSH 0.2.1-rc.2 requires Node.js ^22.19.0 or >=24.0.0."
 }
 if (-not (Test-Path $PROFILE_DIR)) {
   Die "Profile directory not found: $PROFILE_DIR (Please run 'npx @deepseek-ai/dsh web' at least once)."
