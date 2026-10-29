@@ -90,15 +90,12 @@ export class BetterDeepSeekBridgeService extends Service {
                 const sessionId = `session-${crypto.randomUUID()}` as SessionId
                 this.latestAssistantTextBySession.set(sessionId, '')
 
-                const defaultModel = this.ctx.get('agentDefaultModel') as { currentSelection(): { provider: string; model: string } } | undefined
+                const defaultModel = this.ctx.get('agentDefaultModel') as any
                 const selection = defaultModel
                   ? defaultModel.currentSelection()
                   : { provider: 'deepseek-official', model: 'deepseek-chat' }
 
-                const presets = this.ctx.get('agentPresets') as {
-                  resolve(id?: string): Promise<{ id?: string } | undefined>
-                  mount(ctx: Context, id: string): Promise<void>
-                } | undefined
+                const presets = this.ctx.get('agentPresets') as any
                 let presetId: string | undefined
                 if (presets) {
                   try {
