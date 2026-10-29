@@ -5,7 +5,7 @@
 #   1. Remote install from npm registry via DSH CLI:
 #      irm https://raw.githubusercontent.com/mulqizamzam/dsh-better-deepseek/main/scripts/install.ps1 | iex
 #   2. Local development install from source directory:
-#      powershell -ExecutionPolicy Bypass -File install.ps1 -LocalPath "C:\Users\YOUR_USERNAME\GitHub\deepseek-harness\packages\extensions\better-deepseek"
+#      powershell -ExecutionPolicy Bypass -File install.ps1 -LocalPath "<path-to-dsh-better-deepseek>"
 # =============================================================================
 param(
   [string]$Version = '',
@@ -41,7 +41,10 @@ function Die([string]$m) { Write-Host "[error] $m" -ForegroundColor Red; exit 1 
 # Resolve version from npm
 function Resolve-Spec {
   param([string]$Given)
-  if ([string]::IsNullOrWhiteSpace($Given) -or $Given -eq 'latest') {
+  if ([string]::IsNullOrWhiteSpace($Given)) {
+    return $DEFAULT_VERSION
+  }
+  if ($Given -eq 'latest') {
     $v = $null
     if (Get-Command npm -ErrorAction SilentlyContinue) {
       $raw = & npm view $PKG version "--registry=$REGISTRY" 2>$null
